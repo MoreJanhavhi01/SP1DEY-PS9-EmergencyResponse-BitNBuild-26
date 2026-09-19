@@ -1,0 +1,224 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-critical: var(--critical);
+  --color-critical-foreground: var(--critical-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-surface: var(--surface);
+  --color-grid-line: var(--grid-line);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  color-scheme: dark;
+
+  /* near-black warm charcoal base */
+  --background: oklch(0.16 0.006 60);
+  --foreground: oklch(0.93 0.006 80);
+
+  --surface: oklch(0.2 0.007 60);
+  --card: oklch(0.205 0.007 60);
+  --card-foreground: oklch(0.93 0.006 80);
+  --popover: oklch(0.205 0.008 60);
+  --popover-foreground: oklch(0.93 0.006 80);
+
+  /* amber primary accent */
+  --primary: oklch(0.78 0.15 66);
+  --primary-foreground: oklch(0.18 0.02 60);
+
+  --secondary: oklch(0.26 0.008 60);
+  --secondary-foreground: oklch(0.92 0.006 80);
+  --muted: oklch(0.24 0.007 60);
+  --muted-foreground: oklch(0.66 0.01 70);
+  --accent: oklch(0.28 0.02 66);
+  --accent-foreground: oklch(0.93 0.006 80);
+
+  --destructive: oklch(0.62 0.22 25);
+
+  --border: oklch(0.3 0.008 60);
+  --input: oklch(0.26 0.008 60);
+  --ring: oklch(0.78 0.15 66);
+
+  /* semantic status */
+  --critical: oklch(0.63 0.23 25);
+  --critical-foreground: oklch(0.97 0.01 60);
+  --warning: oklch(0.79 0.16 66);
+  --warning-foreground: oklch(0.18 0.02 60);
+  --info: oklch(0.66 0.14 240);
+  --info-foreground: oklch(0.97 0.01 240);
+  --success: oklch(0.72 0.16 152);
+  --success-foreground: oklch(0.18 0.02 152);
+
+  --grid-line: oklch(0.3 0.01 66 / 0.35);
+
+  --chart-1: oklch(0.78 0.15 66);
+  --chart-2: oklch(0.63 0.23 25);
+  --chart-3: oklch(0.66 0.14 240);
+  --chart-4: oklch(0.72 0.16 152);
+  --chart-5: oklch(0.7 0.12 300);
+
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: 'ss01', 'cv01';
+  }
+}
+
+@layer utilities {
+  /* radar / blueprint grid texture */
+  .bg-radar-grid {
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .bg-radar-grid-fine {
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  /* scanline overlay */
+  .bg-scanlines {
+    background-image: repeating-linear-gradient(
+      0deg,
+      oklch(1 0 0 / 0.02) 0px,
+      oklch(1 0 0 / 0.02) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  }
+  .text-glow-amber {
+    text-shadow: 0 0 24px oklch(0.78 0.15 66 / 0.35);
+  }
+}
+
+/* pulsing map marker */
+@keyframes marker-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  70% {
+    transform: scale(3.2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(3.2);
+    opacity: 0;
+  }
+}
+.animate-marker-pulse {
+  animation: marker-pulse 2.4s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+}
+
+/* radar sweep */
+@keyframes radar-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-radar-sweep {
+  animation: radar-sweep 6s linear infinite;
+}
+
+/* slow scanline travel */
+@keyframes scan-travel {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+.animate-scan-travel {
+  animation: scan-travel 5s linear infinite;
+}
+
+/* blinking live dot */
+@keyframes live-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+.animate-live-blink {
+  animation: live-blink 1.4s ease-in-out infinite;
+}
+
+@keyframes feed-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-feed-in {
+  animation: feed-in 0.35s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marker-pulse,
+  .animate-radar-sweep,
+  .animate-scan-travel,
+  .animate-live-blink,
+  .animate-feed-in {
+    animation: none;
+  }
+}
