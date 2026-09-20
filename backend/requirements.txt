@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+python-dotenv
+sentence-transformers
+transformers
+torch
+scikit-learn
+numpy
+pandas
+sqlalchemy
+psycopg2-binary
+websockets

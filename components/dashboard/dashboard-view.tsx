@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { getIncidents } from '@/lib/api'
+ import { useState,useEffect } from 'react' 
 import { Clock, MapPin, Radio, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -20,19 +21,73 @@ const resourceStatusColor: Record<ResourceUnit['status'], string> = {
 }
 
 export function DashboardView() {
-  const [selectedId, setSelectedId] = useState<string>(incidents[0].id)
+ const [backendIncidents, setBackendIncidents] = useState<any[]>([])
+const [selectedId, setSelectedId] = useState("")
+useEffect(() => {
+  async function load() {
+    const data = await getIncidents()
+    const mapped = data.map((i: any, index: number) => ({
+  id: i.reference_code,
+  reference_code: i.reference_code,
+  title: i.title,
+  district: i.location.split(",")[0],
+  location: i.location,
+
+  severityScore: i.severity_score,
+
+  severity:
+    i.severity_score >= 80
+      ? "critical"
+      : i.severity_score >= 60
+      ? "high"
+      : i.severity_score >= 35
+      ? "moderate"
+      : "low",
+
+  status: i.status,
+
+  type: "Incident",
+
+  description: "",
+
+  coord: "",
+
+  duplicates: 0,
+
+  assignedResources: [],
+
+  reportedAt: "",
+
+  reporterType: "",
+
+  x: 20 + (index % 4) * 18,
+
+  y: 25 + Math.floor(index / 4) * 20,
+}))
+
+    setBackendIncidents(data)
+
+    if (data.length > 0) {
+      setSelectedId(data[0].reference_code)
+    }
+  }
+
+  load()
+}, [])
+
   const [filter, setFilter] = useState<'all' | 'active'>('active')
 
   const filtered =
     filter === 'active'
-      ? incidents.filter((i) => i.status !== 'resolved')
-      : incidents
+      ? backendIncidents.filter((i) => i.status !== "resolved")
+    : backendIncidents
 
-  const selected = incidents.find((i) => i.id === selectedId) ?? incidents[0]
-
-  const activeCount = incidents.filter((i) => i.status !== 'resolved').length
-  const criticalCount = incidents.filter((i) => i.severity === 'critical' && i.status !== 'resolved').length
-  const availableUnits = resources.filter((r) => r.status === 'available').length
+  const selected = backendIncidents.find(
+  (i) => i.reference_code === selectedId
+)
+ const activeCount = backendIncidents.filter(i => i.status !== "resolved").length
+const criticalCount = backendIncidents.length
+const availableUnits = resources.filter(r => r.status === "available").length
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
@@ -58,7 +113,7 @@ export function DashboardView() {
         <div className="flex flex-col gap-4">
           <div className="relative h-[26rem]">
             <TacticalMap
-              incidents={incidents}
+              incidents={backendIncidents}
               selectedId={selectedId}
               onSelect={setSelectedId}
               fine
@@ -132,25 +187,36 @@ export function DashboardView() {
             <div className="max-h-96 divide-y divide-border overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
               {filtered.map((inc) => (
                 <button
-                  key={inc.id}
+                 key={inc.reference_code}
                   type="button"
-                  onClick={() => setSelectedId(inc.id)}
+                  onClick={() => setSelectedId(inc.reference_code)}
                   className={cn(
                     'flex w-full flex-col gap-1.5 px-4 py-3 text-left transition-colors hover:bg-accent/50',
-                    selectedId === inc.id && 'bg-accent/60',
+                    selectedId === inc.reference_code && 'bg-accent/60',
                   )}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-mono text-[11px] text-muted-foreground">
-                      {inc.id}
+                      {inc.reference_code}
                     </span>
                     <StatusTag status={inc.status} />
                   </div>
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-sm font-medium leading-tight">
-                      {inc.type} · {inc.district}
+                      {inc.location}
                     </span>
-                    <SeverityTag severity={inc.severity} score={inc.severityScore} />
+                    <SeverityTag
+    severity={
+        inc.severity_score >= 80
+            ? "critical"
+            : inc.severity_score >= 60
+            ? "high"
+            : inc.severity_score >= 40
+            ? "medium"
+            : "low"
+    }
+    score={inc.severity_score}
+/>
                   </div>
                   <span className="line-clamp-1 text-xs text-muted-foreground">
                     {inc.title}
@@ -160,7 +226,7 @@ export function DashboardView() {
             </div>
           </div>
 
-          <IncidentDetail incident={selected} />
+          {selected && <IncidentDetail incident={selected} />}
         </div>
       </div>
     </div>
@@ -196,14 +262,14 @@ function StatCard({
   )
 }
 
-function IncidentDetail({ incident }: { incident: (typeof incidents)[number] }) {
+function IncidentDetail({ incident }: { incident: any }) {
   return (
     <div className="rounded-lg border border-border bg-card">
       <div className="flex items-start justify-between gap-3 border-b border-border px-4 py-3">
         <div>
           <div className="flex items-center gap-2">
             <span className="font-mono text-[11px] text-muted-foreground">
-              {incident.id}
+              {incident.reference_code}
             </span>
             <StatusTag status={incident.status} />
           </div>
@@ -211,28 +277,39 @@ function IncidentDetail({ incident }: { incident: (typeof incidents)[number] }) 
             {incident.title}
           </h3>
         </div>
-        <SeverityTag severity={incident.severity} score={incident.severityScore} />
+        <SeverityTag
+severity={
+incident.severity_score >=80
+? "critical"
+: incident.severity_score >=60
+? "high"
+: incident.severity_score >=40
+? "medium"
+: "low"
+}
+score={incident.severity_score}
+/>
       </div>
       <div className="space-y-3 px-4 py-4">
         <p className="text-sm leading-relaxed text-muted-foreground">
-          {incident.description}
+         no description available.
         </p>
         <dl className="grid grid-cols-2 gap-3 text-xs">
-          <Meta icon={MapPin} label="Location" value={`${incident.district}`} sub={incident.coord} />
-          <Meta icon={Clock} label="Reported" value={incident.reportedAt} sub={incident.reporterType} />
-          <Meta icon={Radio} label="Merged reports" value={`${incident.duplicates} signals`} />
-          <Meta icon={Users} label="Assigned" value={`${incident.assignedResources.length} units`} />
+          <Meta icon={MapPin} label="Location" value={incident.district} />
+          <Meta icon={Clock} label="Reported" value="-"/>
+          <Meta icon={Radio} label="Merged reports" value="-"/>
+          <Meta icon={Users} label="Assigned" value="-" />
         </dl>
         {incident.assignedResources.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-1">
-            {incident.assignedResources.map((r) => (
+           {/*  {incident.assignedResources.map((r) => (
               <span
                 key={r}
                 className="rounded-sm border border-border bg-surface px-2 py-0.5 font-mono text-[10px] tracking-wider text-foreground/80"
               >
                 {r}
               </span>
-            ))}
+            ))} */}
           </div>
         )}
       </div>
